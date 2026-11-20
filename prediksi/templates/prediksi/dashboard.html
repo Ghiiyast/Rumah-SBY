@@ -1,0 +1,109 @@
+{% extends "prediksi/base.html" %}
+{% block judul %}Dashboard Rumah Surabaya{% endblock %}
+
+{% block isi %}
+<div class="banner">
+  <div>
+    <h1>Cari Rumah di Surabaya! 👋</h1>
+    <p>Temukan properti yang pas dari {{ ringkasan.jumlah }} data rumah di 27 kecamatan Surabaya.</p>
+    <a class="tombol-putih" href="{% url 'prediksi' %}">Coba prediksi harga rumah</a>
+  </div>
+  <div class="banner-ikon">🏠</div>
+</div>
+
+<h2>Pilih kategori hunian</h2>
+<div class="kartu-kebutuhan">
+  {% for k in kebutuhan %}
+    <a href="?kebutuhan={{ k.kode }}" class="{% if k.kode == pilih %}aktif{% endif %}">
+      <span class="ikon">{{ k.ikon }}</span>
+      <strong>{{ k.nama }}</strong>
+      <small>{{ k.jumlah }} rumah</small>
+    </a>
+  {% endfor %}
+</div>
+
+<h2>Rekomendasi rumah (10 termurah){% if pilih %} · <a href="{% url 'dashboard' %}">tampilkan semua</a>{% endif %}</h2>
+<div class="tabel-bungkus">
+  <table>
+    <thead>
+      <tr><th>Kecamatan</th><th>Kamar</th><th>LT / LB</th><th>Lantai</th><th>Sertifikat</th><th>Harga</th></tr>
+    </thead>
+    <tbody>
+      {% for t in tabel %}
+        <tr>
+          <td><strong>{{ t.kecamatan }}</strong></td>
+          <td>{{ t.kamar }}</td>
+          <td>{{ t.luas }}</td>
+          <td>{{ t.lantai }}</td>
+          <td>{{ t.sertifikat }}</td>
+          <td class="harga">{{ t.harga }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h2>Analisis Data</h2>
+<div class="grid-grafik">
+  <div class="kartu-grafik">
+    <h3>Sebaran harga rumah</h3>
+    <div class="bungkus-grafik"><canvas id="grafikSebaran"></canvas></div>
+    <div class="penjelasan-ai">
+      <strong>{% if penjelasan.sebaran.ai %}Penjelasan AI{% else %}Ringkasan Data{% endif %}</strong>
+      <p>{{ penjelasan.sebaran.teks }}</p>
+    </div>
+  </div>
+  
+  <div class="kartu-grafik">
+    <h3>Harga tengah per kecamatan (miliar Rp)</h3>
+    <div class="bungkus-grafik"><canvas id="grafikKecamatan"></canvas></div>
+    <div class="penjelasan-ai">
+      <strong>{% if penjelasan.kecamatan.ai %}Penjelasan AI{% else %}Ringkasan Data{% endif %}</strong>
+      <p>{{ penjelasan.kecamatan.teks }}</p>
+    </div>
+  </div>
+</div>>
+
+{{ grafik|json_script:"data-grafik" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  const g = JSON.parse(document.getElementById("data-grafik").textContent);
+  const warna = "#3b5bdb";
+
+  new Chart(document.getElementById("grafikSebaran"), {
+    type: "bar",
+    data: {
+      labels: g.sebaran.label,
+      datasets: [{ label: "Jumlah rumah", data: g.sebaran.nilai, backgroundColor: warna, borderRadius: 6 }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  new Chart(document.getElementById("grafikKecamatan"), {
+    type: "bar",
+    data: {
+      labels: g.kecamatan.label,
+      datasets: [{ label: "Harga tengah (miliar Rp)", data: g.kecamatan.nilai, backgroundColor: warna, borderRadius: 6 }]
+    },
+    options: {
+      indexAxis: "y",
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } }
+    }
+  });
+</script>
+{% endblock %}
+
+{% block panel %}
+<aside class="panel">
+  <h3>Ringkasan Data</h3>
+  <div class="stat"><span>Total properti</span><strong>{{ ringkasan.jumlah }}</strong></div>
+  <div class="stat"><span>Harga rata-rata</span><strong>{{ ringkasan.rata }}</strong></div>
+  <div class="stat"><span>Termurah</span><strong>{{ ringkasan.termurah }}</strong></div>
+  <div class="stat"><span>Termahal</span><strong>{{ ringkasan.termahal }}</strong></div>
+</aside>
+{% endblock %}

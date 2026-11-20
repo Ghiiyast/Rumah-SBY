@@ -1,0 +1,52 @@
+{% extends "prediksi/base.html" %}
+{% block judul %}Prediksi Harga Rumah{% endblock %}
+
+{% block isi %}
+<h1 class="judul-halaman">🔮 Prediksi Harga Rumah Surabaya</h1>
+<p class="sub">Isi lokasi dan spesifikasi bangunan, lalu model memperkirakan harga pasarnya.</p>
+
+<div class="kartu-form">
+  <form method="post">
+    {% csrf_token %}
+
+    {% for f in isian %}
+      <label for="{{ f.nama }}">{{ f.label }}</label>
+      <select name="{{ f.nama }}" id="{{ f.nama }}">
+        {% for p in f.isi %}
+          <option value="{{ p }}" {% if p == f.terpilih %}selected{% endif %}>{{ p }}</option>
+        {% endfor %}
+      </select>
+    {% endfor %}
+
+    <label for="kamar_tidur">Jumlah Kamar Tidur</label>
+    <input type="number" name="kamar_tidur" id="kamar_tidur" required
+           value="{{ nilai.kamar_tidur|default:'3' }}">
+
+    <label for="kamar_mandi">Jumlah Kamar Mandi</label>
+    <input type="number" name="kamar_mandi" id="kamar_mandi" required
+           value="{{ nilai.kamar_mandi|default:'2' }}">
+
+    <label for="luas_tanah">Luas Tanah (m²)</label>
+    <input type="number" name="luas_tanah" id="luas_tanah" step="any" required
+           value="{{ nilai.luas_tanah|default:'100' }}">
+
+    <label for="luas_bangunan">Luas Bangunan (m²)</label>
+    <input type="number" name="luas_bangunan" id="luas_bangunan" step="any" required
+           value="{{ nilai.luas_bangunan|default:'120' }}">
+
+    <button type="submit">Prediksi Harga Rumah</button>
+  </form>
+
+  {% if error %}
+    <div class="error">⚠️ {{ error }}</div>
+  {% endif %}
+
+  {% if harga %}
+    <div class="hasil">
+      <div>Perkiraan harga pasar:</div>
+      <div class="angka">{{ harga_teks }}</div>
+      <div class="catatan">Detail nominal: Rp {{ harga }} (estimasi model berdasarkan data Surabaya).</div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

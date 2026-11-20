@@ -1,0 +1,192 @@
+{% extends "prediksi/base.html" %}
+{% block judul %}Dataset Rumah Surabaya{% endblock %}
+
+{% block isi %}
+<div class="dataset-header">
+  <div>
+    <h1 class="judul-halaman">Dataset Harga Rumah Surabaya</h1>
+    <p class="sub">Data properti residensial Kota Surabaya yang digunakan untuk melatih model prediksi Machine Learning.</p>
+  </div>
+  <a class="tombol-unduh" href="{% url 'unduh_dataset' %}">⬇ Unduh CSV Asli ({{ info.ukuran_kb }} KB)</a>
+</div>
+
+<div class="kartu-meta">
+  <div class="meta-item">
+    <span>Nama File</span>
+    <strong>{{ info.nama }}</strong>
+  </div>
+  <div class="meta-item">
+    <span>Total Baris Asli</span>
+    <strong>{{ info.total_baris }} data</strong>
+  </div>
+  <div class="meta-item">
+    <span>Data Latih Bersih</span>
+    <strong>{{ info.total_bersih }} data</strong>
+  </div>
+  <div class="meta-item">
+    <span>Jumlah Kolom</span>
+    <strong>{{ info.jumlah_kolom }} atribut</strong>
+  </div>
+</div>
+
+<h2>Filter &amp; Pencarian Data</h2>
+<form method="get" action="{% url 'dataset' %}" class="kartu-filter">
+  <div class="grid-filter">
+    <div>
+      <label for="kecamatan">Kecamatan</label>
+      <input
+        type="text"
+        id="kecamatan"
+        name="kecamatan"
+        list="opsi-kecamatan"
+        placeholder="Ketik / pilih kecamatan..."
+        value="{{ filter_aktif.kecamatan }}"
+      >
+      <datalist id="opsi-kecamatan">
+        {% for kec in daftar_kecamatan %}
+          <option value="{{ kec }}">
+        {% endfor %}
+      </datalist>
+    </div>
+
+    <div>
+      <label for="harga_min">Harga Minimum (Juta Rp)</label>
+      <input
+        type="number"
+        id="harga_min"
+        name="harga_min"
+        min="0"
+        step="50"
+        placeholder="Contoh: 500"
+        value="{{ filter_aktif.harga_min }}"
+      >
+    </div>
+
+    <div>
+      <label for="harga_max">Harga Maksimum (Juta Rp)</label>
+      <input
+        type="number"
+        id="harga_max"
+        name="harga_max"
+        min="0"
+        step="50"
+        placeholder="Contoh: 2500"
+        value="{{ filter_aktif.harga_max }}"
+      >
+    </div>
+
+    {% if ada_lt %}
+    <div>
+      <label for="lt_min">Luas Tanah Min. (m²)</label>
+      <input
+        type="number"
+        id="lt_min"
+        name="lt_min"
+        min="0"
+        placeholder="Contoh: 90"
+        value="{{ filter_aktif.lt_min }}"
+      >
+    </div>
+    {% endif %}
+
+    {% if ada_lb %}
+    <div>
+      <label for="lb_min">Luas Bangunan Min. (m²)</label>
+      <input
+        type="number"
+        id="lb_min"
+        name="lb_min"
+        min="0"
+        placeholder="Contoh: 70"
+        value="{{ filter_aktif.lb_min }}"
+      >
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="aksi-filter">
+    <button type="submit" class="tombol-cari">🔍 Terapkan Filter</button>
+    <a href="{% url 'dataset' %}" class="tombol-reset">Reset Filter</a>
+    <span class="info-hasil">Menampilkan <strong>{{ info.hasil_filter }}</strong> dari {{ info.total_baris }} baris</span>
+  </div>
+</form>
+
+<h2>Preview Dataset Asli (Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }})</h2>
+<div class="tabel-bungkus tabel-dataset">
+  <table>
+    <thead>
+      <tr>
+        <th class="kolom-no">#</th>
+        {% for nama_kolom in kolom %}
+          <th>{{ nama_kolom }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for baris in page_obj %}
+        <tr>
+          <td class="kolom-no">{{ forloop.counter0|add:page_obj.start_index }}</td>
+          {% for sel in baris %}
+            <td>{{ sel }}</td>
+          {% endfor %}
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="{{ kolom|length|add:1 }}" class="kosong">
+            Tidak ada data yang cocok dengan kriteria pencarian. Silakan klik <strong>Reset Filter</strong>.
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="paginasi" aria-label="Navigasi halaman dataset">
+  {% if page_obj.has_previous %}
+    <a href="?{% if query_string %}{{ query_string }}&{% endif %}page=1">« Awal</a>
+    <a href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ page_obj.previous_page_number }}">‹ Sebelumnya</a>
+  {% else %}
+    <span class="nonaktif">« Awal</span>
+    <span class="nonaktif">‹ Sebelumnya</span>
+  {% endif %}
+
+  <span class="halaman-aktif">Halaman {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+
+  {% if page_obj.has_next %}
+    <a href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ page_obj.next_page_number }}">Berikutnya ›</a>
+    <a href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ page_obj.paginator.num_pages }}">Akhir »</a>
+  {% else %}
+    <span class="nonaktif">Berikutnya ›</span>
+    <span class="nonaktif">Akhir »</span>
+  {% endif %}
+</nav>
+{% endif %}
+
+<h2>Sumber &amp; Keterangan Dataset</h2>
+<div class="kartu-sumber">
+  <p>
+    <strong>Deskripsi Dataset:</strong> Dataset ini memuat daftar iklan dan spesifikasi properti rumah dijual di wilayah Kota Surabaya
+    (mencakup harga penawaran, lokasi kecamatan, luas tanah, luas bangunan, jumlah kamar tidur, kamar mandi, jumlah lantai,
+    jenis sertifikat hak milik, kondisi perabotan, dan kondisi bangunan).
+  </p>
+  <p>
+    <strong>Sumber Data:</strong> <em>Surabaya Housing Dataset</em> — kumpulan data pasar properti residensial Surabaya yang dikompilasi
+    dari portal listing properti publik untuk keperluan penelitian akademik dan pemodelan pembelajaran mesin.
+  </p>
+  <p>
+    <strong>Lisensi &amp; Penggunaan:</strong> Digunakan untuk keperluan edukasi, analisis statistik, dan pengembangan prototipe
+    akademik non-komersial. File asli menggunakan pemisah titik koma (<code>;</code>) dan dapat diunduh langsung melalui tombol di atas.
+  </p>
+</div>
+{% endblock %}
+
+{% block panel %}
+<aside class="panel">
+  <h3>Metadata Dataset</h3>
+  <div class="stat"><span>Nama berkas</span><strong>{{ info.nama }}</strong></div>
+  <div class="stat"><span>Baris dataset asli</span><strong>{{ info.total_baris }}</strong></div>
+  <div class="stat"><span>Data setelah cleaning</span><strong>{{ info.total_bersih }}</strong></div>
+  <div class="stat"><span>Hasil filter aktif</span><strong>{{ info.hasil_filter }}</strong></div>
+</aside>
+{% endblock %}
