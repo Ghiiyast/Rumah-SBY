@@ -25,17 +25,24 @@ INSTRUKSI = (
     "secara sederhana gambaran pasar yang terlihat dari grafik tersebut tanpa mengarang "
     "angka baru. Ingat bahwa 'M' artinya miliar rupiah."
 )
+INSTRUKSI_PREDIKSI = (
+    "Kamu adalah asisten penjelas estimasi properti di Surabaya. Jelaskan hasil estimasi "
+    "dalam bahasa Indonesia yang ramah dan mudah dipahami, sekitar 2 sampai 4 kalimat. "
+    "Gunakan hanya fakta pada data yang diberikan. Jelaskan bahwa nilai adalah estimasi "
+    "model, bukan harga transaksi atau penilaian resmi. Jangan mengarang faktor penting "
+    "model, angka, atau kesimpulan yang tidak didukung data."
+)
 _simpan = {}
 
 
-def tanya_groq(topik, fakta):
+def tanya_groq(topik, fakta, instruksi=INSTRUKSI):
     """Meminta Groq menjelaskan data. Hasilnya teks, atau None kalau gagal."""
     kunci = os.environ.get("GROQ_API_KEY")
     if not kunci:
         logger.warning("GROQ_API_KEY belum dikonfigurasi; memakai ringkasan data.")
         return None
 
-    cache_key = (topik, fakta)
+    cache_key = (topik, fakta, instruksi)
     if cache_key in _simpan:
         return _simpan[cache_key]
 
@@ -46,8 +53,8 @@ def tanya_groq(topik, fakta):
             json={
                 "model": MODEL,
                 "messages": [
-                    {"role": "system", "content": INSTRUKSI},
-                    {"role": "user", "content": f"Grafik: {topik}\nData:\n{fakta}"},
+                    {"role": "system", "content": instruksi},
+                    {"role": "user", "content": f"Topik: {topik}\nData:\n{fakta}"},
                 ],
                 "temperature": 0.3,
                 "max_tokens": 3000,
@@ -140,3 +147,35 @@ def penjelasan_dashboard(grafik):
             bool(kec["label"] and kec["nilai"]),
         ),
     }
+
+
+def penjelasan_prediksi(masukan, harga_teks, rumah_serupa):
+    """Menjelaskan estimasi harga berdasarkan input dan rumah pembanding."""
+    spesifikasi = (
+        f"kecamatan {masukan['kecamatan']}, {masukan['jumlah_lantai']:g} lantai, "
+        f"LT {masukan['luas_tanah']:g} m², LB {masukan['luas_bangunan']:g} m², "
+        f"{masukan['kamar_tidur']} kamar tidur, {masukan['kamar_mandi']} kamar mandi, "
+        f"sertifikat {masukan['sertifikat']}, kondisi perabotan {masukan['perabotan']}, "
+        f"dan kondisi properti {masukan['kondisi']}."
+    )
+    fakta_pembanding = "\n".join(
+        f"- {rumah['kecamatan']}: {rumah['detail']}, harga tercantum {rumah['harga']}."
+        for rumah in rumah_serupa
+    ) or "- Tidak ada rumah pembanding yang tersedia."
+    fakta = (
+        f"Estimasi model: {harga_teks}.\n"
+        f"Karakteristik input: {spesifikasi}\n"
+        f"Rumah pembanding terdekat dari dataset:\n{fakta_pembanding}"
+    )
+    ringkasan = (
+        f"Model memperkirakan harga {harga_teks} untuk rumah di {masukan['kecamatan']} "
+        f"dengan LT {masukan['luas_tanah']:g} m² dan LB {masukan['luas_bangunan']:g} m². "
+        "Rumah pembanding di bawah memiliki karakteristik yang mendekati, tetapi "
+        "harga tercantum bukan jaminan harga transaksi."
+    )
+    teks_ai = tanya_groq(
+        "Penjelasan estimasi harga rumah Surabaya",
+        fakta,
+        INSTRUKSI_PREDIKSI,
+    )
+    return {"teks": teks_ai or ringkasan, "ai": bool(teks_ai)}

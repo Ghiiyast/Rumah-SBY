@@ -2,13 +2,22 @@
 {% block judul %}Dataset Rumah Surabaya{% endblock %}
 
 {% block isi %}
+<p class="dataset-eyebrow">OVERVIEW / DATASET PROPERTI</p>
 <div class="dataset-header">
   <div>
     <h1 class="judul-halaman">Dataset Harga Rumah Surabaya</h1>
     <p class="sub">Data properti residensial Kota Surabaya yang digunakan untuk melatih model prediksi Machine Learning.</p>
   </div>
-  <a class="tombol-unduh" href="{% url 'unduh_dataset' %}">⬇ Unduh CSV Asli ({{ info.ukuran_kb }} KB)</a>
 </div>
+
+<section class="dataset-hero">
+  <div>
+    <span class="dataset-hero-label">DATA RUMAH SURABAYA</span>
+    <h2>Kenali data yang mendukung prediksi harga rumah.</h2>
+    <p>Jelajahi data properti, gunakan filter untuk menemukan kriteria tertentu, atau unduh file asli untuk analisis lebih lanjut.</p>
+  </div>
+  <a class="tombol-unduh" href="{% url 'unduh_dataset' %}">⬇ Unduh CSV Asli ({{ info.ukuran_kb }} KB)</a>
+</section>
 
 <div class="kartu-meta">
   <div class="meta-item">
@@ -29,7 +38,7 @@
   </div>
 </div>
 
-<h2>Filter &amp; Pencarian Data</h2>
+<h2>Jelajahi dataset</h2>
 <form method="get" action="{% url 'dataset' %}" class="kartu-filter">
   <div class="grid-filter">
     <div>
@@ -111,7 +120,12 @@
   </div>
 </form>
 
-<h2>Preview Dataset Asli (Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }})</h2>
+<div class="dataset-section-heading">
+  <div>
+    <h2>Preview dataset asli</h2>
+    <p>Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }} · {{ info.hasil_filter }} data ditemukan</p>
+  </div>
+</div>
 <div class="tabel-bungkus tabel-dataset">
   <table>
     <thead>
@@ -163,7 +177,7 @@
 </nav>
 {% endif %}
 
-<h2>Sumber &amp; Keterangan Dataset</h2>
+<h2>Sumber &amp; keterangan</h2>
 <div class="kartu-sumber">
   <p>
     <strong>Deskripsi Dataset:</strong> Dataset ini memuat daftar iklan dan spesifikasi properti rumah dijual di wilayah Kota Surabaya

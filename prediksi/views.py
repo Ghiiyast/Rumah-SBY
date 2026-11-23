@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 from django.http import FileResponse, Http404
 from django.shortcuts import render
 from .grafik import siapkan_grafik
-from .penjelasan_ai import penjelasan_dashboard
+from .penjelasan_ai import penjelasan_dashboard, penjelasan_prediksi
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -31,6 +31,51 @@ def format_rupiah(nilai):
     return f"Rp {nilai / 1_000_000:,.0f} Juta".replace(".", ",")
 
 
+def cari_rumah_serupa(masukan):
+    """Mengurutkan tiga listing dataset yang paling mendekati input prediksi."""
+    skor = pd.Series(0.0, index=data.index)
+    kolom_kategori = {
+        "kecamatan": ("Kecamatan", 1.5),
+        "sertifikat": ("Sertifikat", 0.6),
+        "perabotan": ("Kondisi Perabotan", 0.5),
+        "kondisi": ("Kondisi Properti", 0.6),
+    }
+    for kunci, (kolom, bobot) in kolom_kategori.items():
+        target = str(masukan[kunci]).strip().casefold()
+        berbeda = data[kolom].astype(str).str.strip().str.casefold() != target
+        skor += berbeda.astype(float) * bobot
+
+    kolom_numerik = {
+        "jumlah_lantai": ("Jumlah Lantai", 0.3),
+        "kamar_tidur": ("Kamar Tidur", 0.5),
+        "kamar_mandi": ("Kamar Mandi", 0.3),
+        "luas_tanah": ("Luas Tanah", 0.9),
+        "luas_bangunan": ("Luas Bangunan", 0.9),
+    }
+    for kunci, (kolom, bobot) in kolom_numerik.items():
+        nilai_kolom = pd.to_numeric(data[kolom], errors="coerce")
+        skala = nilai_kolom.quantile(0.75) - nilai_kolom.quantile(0.25)
+        if not skala or pd.isna(skala):
+            skala = nilai_kolom.std()
+        if not skala or pd.isna(skala):
+            skala = 1
+        skor += (nilai_kolom.sub(masukan[kunci]).abs() / skala).clip(upper=5) * bobot
+
+    kandidat = data.assign(_skor_serupa=skor).nsmallest(3, "_skor_serupa")
+    rumah = []
+    for _, row in kandidat.iterrows():
+        rumah.append({
+            "kecamatan": row["Kecamatan_Label"],
+            "kondisi": row["Kondisi Properti"],
+            "detail": (
+                f"LT {int(row['Luas Tanah'])} / LB {int(row['Luas Bangunan'])} m² · "
+                f"{int(row['Kamar Tidur'])} KT · {int(row['Kamar Mandi'])} KM"
+            ),
+            "harga": format_rupiah(row["harga"]),
+        })
+    return rumah
+
+
 daftar_pilihan = [
     ("kecamatan", "Kecamatan (Surabaya)", sorted(data["Kecamatan"].unique())),
     ("sertifikat", "Jenis Sertifikat", sorted(data["Sertifikat"].unique())),
@@ -49,6 +94,7 @@ batas = {
 
 def prediksi(request):
     nilai = {}
+    masukan = None
     harga = None
     harga_teks = None
     error = None
@@ -83,6 +129,30 @@ def prediksi(request):
                 harga = f"{hasil_rp:,}".replace(",", ".")
                 harga_teks = format_rupiah(hasil_rp)
 
+    if request.method == "GET":
+        masukan_serupa = {
+            nama: pilihan[0]
+            for nama, _, pilihan in daftar_pilihan
+        }
+        masukan_serupa.update({
+            "jumlah_lantai": float(masukan_serupa["jumlah_lantai"]),
+            "kamar_tidur": 3,
+            "kamar_mandi": 2,
+            "luas_tanah": 100,
+            "luas_bangunan": 120,
+        })
+        rumah_serupa = cari_rumah_serupa(masukan_serupa)
+    elif masukan and not error:
+        rumah_serupa = cari_rumah_serupa(masukan)
+    else:
+        rumah_serupa = []
+
+    penjelasan = (
+        penjelasan_prediksi(masukan, harga_teks, rumah_serupa)
+        if harga and masukan
+        else None
+    )
+
     isian = [
         {"nama": nama, "label": label, "isi": isi, "terpilih": nilai.get(nama)}
         for nama, label, isi in daftar_pilihan
@@ -95,6 +165,8 @@ def prediksi(request):
         "harga": harga,
         "harga_teks": harga_teks,
         "error": error,
+        "rumah_serupa": rumah_serupa,
+        "penjelasan": penjelasan,
     })
 
 

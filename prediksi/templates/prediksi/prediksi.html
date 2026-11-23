@@ -2,51 +2,131 @@
 {% block judul %}Prediksi Harga Rumah{% endblock %}
 
 {% block isi %}
-<h1 class="judul-halaman">🔮 Prediksi Harga Rumah Surabaya</h1>
-<p class="sub">Isi lokasi dan spesifikasi bangunan, lalu model memperkirakan harga pasarnya.</p>
-
-<div class="kartu-form">
-  <form method="post">
-    {% csrf_token %}
-
-    {% for f in isian %}
-      <label for="{{ f.nama }}">{{ f.label }}</label>
-      <select name="{{ f.nama }}" id="{{ f.nama }}">
-        {% for p in f.isi %}
-          <option value="{{ p }}" {% if p == f.terpilih %}selected{% endif %}>{{ p }}</option>
-        {% endfor %}
-      </select>
-    {% endfor %}
-
-    <label for="kamar_tidur">Jumlah Kamar Tidur</label>
-    <input type="number" name="kamar_tidur" id="kamar_tidur" required
-           value="{{ nilai.kamar_tidur|default:'3' }}">
-
-    <label for="kamar_mandi">Jumlah Kamar Mandi</label>
-    <input type="number" name="kamar_mandi" id="kamar_mandi" required
-           value="{{ nilai.kamar_mandi|default:'2' }}">
-
-    <label for="luas_tanah">Luas Tanah (m²)</label>
-    <input type="number" name="luas_tanah" id="luas_tanah" step="any" required
-           value="{{ nilai.luas_tanah|default:'100' }}">
-
-    <label for="luas_bangunan">Luas Bangunan (m²)</label>
-    <input type="number" name="luas_bangunan" id="luas_bangunan" step="any" required
-           value="{{ nilai.luas_bangunan|default:'120' }}">
-
-    <button type="submit">Prediksi Harga Rumah</button>
-  </form>
-
-  {% if error %}
-    <div class="error">⚠️ {{ error }}</div>
-  {% endif %}
-
-  {% if harga %}
-    <div class="hasil">
-      <div>Perkiraan harga pasar:</div>
-      <div class="angka">{{ harga_teks }}</div>
-      <div class="catatan">Detail nominal: Rp {{ harga }} (estimasi model berdasarkan data Surabaya).</div>
-    </div>
-  {% endif %}
+<p class="prediksi-eyebrow">ESTIMASI PROPERTI</p>
+<div class="prediksi-heading">
+  <h1 class="judul-halaman">Prediksi harga rumah</h1>
+  <p class="sub">Kenali nilai rumah Anda melalui 9 karakteristik properti.</p>
 </div>
+
+<div class="prediksi-layout">
+  <section class="kartu-form" aria-labelledby="judul-form-prediksi">
+    <div class="form-heading">
+      <span class="form-eyebrow">01 DETAIL PROPERTI</span>
+      <h2 id="judul-form-prediksi">Lengkapi spesifikasi rumah</h2>
+      <p>Isi seluruh kolom untuk mendapatkan estimasi.</p>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="grid-isian">
+        {% for f in isian %}
+          <div class="field">
+            <label for="{{ f.nama }}">{{ f.label }}</label>
+            <select name="{{ f.nama }}" id="{{ f.nama }}">
+              {% for p in f.isi %}
+                <option value="{{ p }}" {% if p == f.terpilih %}selected{% endif %}>{{ p }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        {% endfor %}
+
+        <div class="field">
+          <label for="kamar_tidur">Kamar tidur</label>
+          <input type="number" name="kamar_tidur" id="kamar_tidur" required
+                 value="{{ nilai.kamar_tidur|default:'3' }}">
+        </div>
+
+        <div class="field">
+          <label for="kamar_mandi">Kamar mandi</label>
+          <input type="number" name="kamar_mandi" id="kamar_mandi" required
+                 value="{{ nilai.kamar_mandi|default:'2' }}">
+        </div>
+
+        <div class="field">
+          <label for="luas_tanah">Luas tanah</label>
+          <div class="input-unit">
+            <input type="number" name="luas_tanah" id="luas_tanah" step="any" required
+                   value="{{ nilai.luas_tanah|default:'100' }}">
+            <span>m²</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="luas_bangunan">Luas bangunan</label>
+          <div class="input-unit">
+            <input type="number" name="luas_bangunan" id="luas_bangunan" step="any" required
+                   value="{{ nilai.luas_bangunan|default:'120' }}">
+            <span>m²</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="form-hint">Pastikan luas lebih dari 0 m² dan jumlah kamar serta lantai bernilai positif.</p>
+      <button type="submit" class="prediksi-submit">Prediksi harga rumah ↗</button>
+      <p class="model-hint">Random Forest Regression · 9 fitur input</p>
+    </form>
+  </section>
+
+  <aside class="prediksi-aside">
+    <section class="prediksi-result-card" aria-live="polite">
+      <span class="form-eyebrow">02 HASIL ESTIMASI</span>
+      {% if error %}
+        <h2>Prediksi belum tersedia</h2>
+        <p class="error">{{ error }}</p>
+      {% elif harga %}
+        <p class="result-caption">Estimasi harga rumah</p>
+        <p class="result-price">{{ harga_teks }}</p>
+        <p class="result-details">
+          {{ nilai.kecamatan }} · {{ nilai.jumlah_lantai }} lantai<br>
+          LT {{ nilai.luas_tanah }} m² · LB {{ nilai.luas_bangunan }} m²<br>
+          {{ nilai.kamar_tidur }} kamar tidur · {{ nilai.kamar_mandi }} kamar mandi
+        </p>
+        <p class="result-status">✓ Estimasi berhasil dihitung</p>
+        <p class="catatan">Nilai rinci: Rp {{ harga }}</p>
+      {% else %}
+        <h2>Hasil prediksi Anda</h2>
+        <p class="result-placeholder">Lengkapi detail properti, lalu pilih tombol prediksi untuk melihat estimasi harga.</p>
+      {% endif %}
+    </section>
+
+    <section class="prediksi-info-card">
+      <h2>✧ Penjelasan AI</h2>
+      {% if penjelasan %}
+        <span class="explanation-label">
+          {% if penjelasan.ai %}DIBUAT OLEH AI{% else %}RINGKASAN ESTIMASI{% endif %}
+        </span>
+        <p>{{ penjelasan.teks }}</p>
+        <p class="info-source">Berdasarkan spesifikasi dan data pembanding di bawah.</p>
+      {% else %}
+        <p class="result-placeholder">Penjelasan akan muncul setelah Anda mendapatkan estimasi harga.</p>
+      {% endif %}
+    </section>
+  </aside>
+</div>
+
+{% if rumah_serupa %}
+<section class="rumah-serupa" aria-labelledby="judul-rumah-serupa">
+  <div class="similar-heading">
+    <div>
+      <h2 id="judul-rumah-serupa">Rumah dengan karakteristik serupa</h2>
+      <p>Contoh pembanding yang paling mendekati dari dataset Surabaya.</p>
+    </div>
+  </div>
+  <div class="similar-grid">
+    {% for rumah in rumah_serupa %}
+      <article class="similar-card">
+        <strong>{{ rumah.kecamatan }} · {{ rumah.kondisi }}</strong>
+        <p>{{ rumah.detail }}</p>
+        <span>{{ rumah.harga }}</span>
+      </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="prediksi-note">
+  <strong>Penting untuk diketahui</strong>
+  <p>Estimasi ini bukan harga transaksi atau penilaian resmi. Kondisi lapangan dan perubahan pasar dapat memengaruhi harga rumah.</p>
+</section>
 {% endblock %}
