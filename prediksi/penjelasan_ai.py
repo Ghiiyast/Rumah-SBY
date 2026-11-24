@@ -32,6 +32,13 @@ INSTRUKSI_PREDIKSI = (
     "model, bukan harga transaksi atau penilaian resmi. Jangan mengarang faktor penting "
     "model, angka, atau kesimpulan yang tidak didukung data."
 )
+INSTRUKSI_ANALISIS = (
+    "Jelaskan fakta grafik dalam bahasa Indonesia sederhana, maksimal 3 kalimat. "
+    "Gunakan hanya angka yang diberikan dan cukup sebutkan pola atau perbandingan angka. "
+    "Jangan menyimpulkan sebab-akibat; hindari kata meningkatkan, memengaruhi, membuat, "
+    "atau karena. Jangan memberi saran investasi atau pembelian. Ingat bahwa M berarti "
+    "miliar rupiah."
+)
 _simpan = {}
 
 
@@ -46,6 +53,7 @@ def tanya_groq(topik, fakta, instruksi=INSTRUKSI):
     if cache_key in _simpan:
         return _simpan[cache_key]
 
+    label_topik = "Grafik" if instruksi == INSTRUKSI else "Topik"
     try:
         respons = requests.post(
             URL_GROQ,
@@ -54,7 +62,7 @@ def tanya_groq(topik, fakta, instruksi=INSTRUKSI):
                 "model": MODEL,
                 "messages": [
                     {"role": "system", "content": instruksi},
-                    {"role": "user", "content": f"Topik: {topik}\nData:\n{fakta}"},
+                    {"role": "user", "content": f"{label_topik}: {topik}\nData:\n{fakta}"},
                 ],
                 "temperature": 0.3,
                 "max_tokens": 3000,

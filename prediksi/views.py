@@ -1,28 +1,31 @@
 from pathlib import Path
+
 import joblib
 import pandas as pd
 from django.core.paginator import Paginator
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, JsonResponse
+from django.views.decorators.http import require_GET
+from .analitik import buat_analisis, data_kosong, kecamatan_valid, muat
 from django.shortcuts import render
 from .grafik import siapkan_grafik
-from .penjelasan_ai import penjelasan_dashboard, penjelasan_prediksi
+from .penjelasan_ai import (
+    INSTRUKSI_ANALISIS,
+    MODEL,
+    penjelasan_dashboard,
+    penjelasan_prediksi,
+    tanya_groq,
+)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 model = joblib.load(BASE_DIR / "model" / "model_rumah.joblib")
 
-# Muat dan bersihkan dataset saat server menyala
-data = pd.read_csv(BASE_DIR / "data" / "rumah_surabaya.csv", sep=";")
-data.columns = data.columns.str.strip()
-data = data.drop_duplicates()
-data["harga"] = pd.to_numeric(
-    data["Price"].astype(str).str.replace(".", "", regex=False).str.strip(),
-    errors="coerce",
-)
-data = data.dropna(subset=["Jumlah Lantai", "Kondisi Properti", "harga"])
-data = data[data["Luas Bangunan"] <= 1500].copy()
-data["Kecamatan_Label"] = data["Kecamatan"].str.title()
-
+try:
+    data = muat()
+    DATASET_TERSEDIA = True
+except FileNotFoundError:
+    data = data_kosong()
+    DATASET_TERSEDIA = False
 
 def format_rupiah(nilai):
     """Ubah angka Rupiah besar menjadi format ringkas (Juta / Miliar)."""
@@ -84,12 +87,15 @@ daftar_pilihan = [
     ("jumlah_lantai", "Jumlah Lantai", [str(int(x)) for x in sorted(data["Jumlah Lantai"].unique())]),
 ]
 
-batas = {
-    "kamar_tidur": ("Kamar Tidur", int(data["Kamar Tidur"].min()), int(data["Kamar Tidur"].max())),
-    "kamar_mandi": ("Kamar Mandi", int(data["Kamar Mandi"].min()), int(data["Kamar Mandi"].max())),
-    "luas_tanah": ("Luas Tanah (m²)", int(data["Luas Tanah"].min()), int(data["Luas Tanah"].max())),
-    "luas_bangunan": ("Luas Bangunan (m²)", int(data["Luas Bangunan"].min()), int(data["Luas Bangunan"].max())),
-}
+if data.empty:
+    batas = {}
+else:
+    batas = {
+        "kamar_tidur": ("Kamar Tidur", int(data["Kamar Tidur"].min()), int(data["Kamar Tidur"].max())),
+        "kamar_mandi": ("Kamar Mandi", int(data["Kamar Mandi"].min()), int(data["Kamar Mandi"].max())),
+        "luas_tanah": ("Luas Tanah (m²)", int(data["Luas Tanah"].min()), int(data["Luas Tanah"].max())),
+        "luas_bangunan": ("Luas Bangunan (m²)", int(data["Luas Bangunan"].min()), int(data["Luas Bangunan"].max())),
+    }
 
 
 def prediksi(request):
@@ -99,7 +105,10 @@ def prediksi(request):
     harga_teks = None
     error = None
 
-    if request.method == "POST":
+    if request.method == "POST" and data.empty:
+        nilai = request.POST.dict()
+        error = "Dataset rumah belum tersedia untuk membuat prediksi."
+    elif request.method == "POST":
         nilai = request.POST.dict()
         try:
             masukan = {
@@ -129,7 +138,7 @@ def prediksi(request):
                 harga = f"{hasil_rp:,}".replace(",", ".")
                 harga_teks = format_rupiah(hasil_rp)
 
-    if request.method == "GET":
+    if request.method == "GET" and not data.empty:
         masukan_serupa = {
             nama: pilihan[0]
             for nama, _, pilihan in daftar_pilihan
@@ -216,12 +225,20 @@ def dashboard(request):
         })
 
     h = data["harga"]
-    ringkasan = {
-        "jumlah": f"{len(data):,}".replace(",", "."),
-        "rata": format_rupiah(h.mean()),
-        "termurah": format_rupiah(h.min()),
-        "termahal": format_rupiah(h.max()),
-    }
+    if h.empty:
+        ringkasan = {
+            "jumlah": "0",
+            "rata": "Belum tersedia",
+            "termurah": "Belum tersedia",
+            "termahal": "Belum tersedia",
+        }
+    else:
+        ringkasan = {
+            "jumlah": f"{len(data):,}".replace(",", "."),
+            "rata": format_rupiah(h.mean()),
+            "termurah": format_rupiah(h.min()),
+            "termahal": format_rupiah(h.max()),
+        }
 
     grafik = siapkan_grafik(data)
     penjelasan = penjelasan_dashboard(grafik)
@@ -237,8 +254,98 @@ def dashboard(request):
     })
 
 
+def analisis(request):
+    daftar_kecamatan = (
+        sorted(data["Kecamatan"].dropna().astype(str).str.strip().unique())
+        if "Kecamatan" in data
+        else []
+    )
+    kecamatan = kecamatan_valid(data, request.GET.get("kecamatan", ""))
+    mode = request.GET.get("mode", "total")
+    if mode not in {"total", "m2"}:
+        mode = "total"
+
+    grafik = buat_analisis(data, kecamatan, mode)
+    jumlah_filter = (
+        int((data["Kecamatan"].astype(str).str.casefold() == kecamatan.casefold()).sum())
+        if kecamatan and not data.empty
+        else len(data)
+    )
+    if not DATASET_TERSEDIA:
+        fakta_data = "File data/rumah_surabaya.csv belum tersedia."
+    else:
+        fakta_data = (
+            f"Dihitung dari {jumlah_filter:,} rumah setelah pembersihan."
+            .replace(",", ".")
+        )
+    jumlah_pilih = (
+        int((data["Kecamatan"].astype(str).str.casefold() == kecamatan.casefold()).sum())
+        if kecamatan and not data.empty
+        else 0
+    )
+    return render(request, "prediksi/analisis.html", {
+        "halaman": "analisis",
+        "kecamatan": kecamatan,
+        "daftar_kecamatan": daftar_kecamatan,
+        "mode": mode,
+        "data_json": grafik,
+        "data_tersedia": DATASET_TERSEDIA and not data.empty,
+        "fakta_data": fakta_data,
+        "peringatan_data_sedikit": bool(kecamatan and jumlah_pilih < 20),
+        "jumlah_kecamatan": jumlah_pilih,
+        "grafik_distribusi": grafik["01"],
+        "grafik_kecamatan": grafik["02"],
+        "grafik_luas_harga": grafik["03"],
+        "model_ai": MODEL,
+    })
+
+
+@require_GET
+def analisis_penjelasan(request):
+    nomor = request.GET.get("grafik", "")
+    if nomor not in {"01", "02", "03"}:
+        return JsonResponse({"teks": "Nomor grafik tidak valid."}, status=400)
+
+    mode = request.GET.get("mode", "total")
+    if mode not in {"total", "m2"}:
+        return JsonResponse({"teks": "Mode harga tidak valid."}, status=400)
+
+    kecamatan = kecamatan_valid(data, request.GET.get("kecamatan", ""))
+    if not DATASET_TERSEDIA or data.empty:
+        return JsonResponse({"teks": "Penjelasan AI sedang tidak tersedia."})
+
+    grafik = buat_analisis(data, kecamatan, mode)[nomor]
+    ada_fakta = bool(grafik.get("facts"))
+    if nomor == "01":
+        ada_fakta = ada_fakta and grafik["total"] > 0
+    elif nomor == "02":
+        ada_fakta = ada_fakta and grafik["has_data"]
+    elif nomor == "03":
+        ada_fakta = ada_fakta and grafik["sample_count"] > 0
+    if not ada_fakta:
+        return JsonResponse({"teks": "Penjelasan AI sedang tidak tersedia."})
+
+    nama_grafik = {
+        "01": "Distribusi harga rumah",
+        "02": "Harga per kecamatan",
+        "03": "Luas tanah dan harga",
+    }[nomor]
+    topik = (
+        f"Grafik {nomor}: {nama_grafik}; kecamatan: {kecamatan or 'semua kecamatan'}; "
+        f"mode: {mode if nomor == '02' else 'tetap'}"
+    )
+    teks = tanya_groq(topik, grafik["facts"], INSTRUKSI_ANALISIS)
+    return JsonResponse({
+        "teks": teks or "Penjelasan AI sedang tidak tersedia.",
+        "tersedia": bool(teks),
+    })
+
+
 def dataset_view(request):
     """Menampilkan informasi, filter, tabel paginasi, dan unduhan dataset asli."""
+    if not DATASET_TERSEDIA:
+        raise Http404("Dataset rumah belum tersedia.")
+
     path_csv = BASE_DIR / "data" / "rumah_surabaya.csv"
     df_asli = pd.read_csv(path_csv, sep=";")
     df_asli.columns = df_asli.columns.str.strip()

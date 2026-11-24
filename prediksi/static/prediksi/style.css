@@ -392,3 +392,97 @@ button:hover { opacity: .9; }
   .dataset-hero { align-items: flex-start; flex-direction: column; padding: 20px; }
   .dataset-hero .tombol-unduh { white-space: normal; }
 }
+
+/* ===== Halaman Analisis Data ===== */
+.analisis-header { margin-bottom: 18px; }
+.analisis-eyebrow { margin: 0 0 8px; color: var(--aksen); font-size: .68rem; font-weight: 600; letter-spacing: .08em; }
+.analisis-header .judul-halaman { margin-bottom: 5px; }
+.analisis-header .sub { font-size: .88rem; }
+.analisis-fakta {
+  border: 1px solid var(--garis);
+  border-radius: 14px;
+  background: var(--aksen-muda);
+}
+.analisis-fakta { margin: 16px 0 14px; padding: 15px 18px; font-size: .82rem; }
+.analisis-fakta strong { display: block; color: var(--aksen); font-size: .75rem; }
+.analisis-fakta p { margin: 6px 0 0; color: var(--teks-redup); line-height: 1.5; }
+.analisis-filter {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--garis);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.85);
+}
+.analisis-filter > div { flex: 1 1 190px; }
+.analisis-filter label { margin: 0; font-size: .76rem; font-weight: 600; }
+.analisis-filter select { min-height: 40px; margin-top: 5px; font-size: .84rem; }
+.analisis-filter-submit {
+  width: auto;
+  min-height: 40px;
+  margin: 0;
+  padding: 8px 18px;
+  font-size: .82rem;
+}
+.analisis-peringatan { margin: 0 0 14px; padding: 10px 14px; border: 1px solid var(--garis); border-radius: 10px; background: var(--aksen-muda); color: var(--aksen); font-size: .8rem; }
+.analisis-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: start; }
+.kartu-analisis {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--garis);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.85);
+}
+.kartu-analisis:nth-child(3) { grid-column: 1 / -1; }
+.kartu-analisis h2 {
+  margin: 0 0 7px;
+  color: var(--teks);
+  font-size: .96rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.kartu-analisis h2 span { color: var(--aksen); margin-right: 5px; }
+.analisis-subjudul { min-height: 1.2em; margin: 0 0 12px; color: var(--teks-redup); font-size: .74rem; line-height: 1.45; }
+.analisis-chart-wrap { position: relative; width: 100%; height: 245px; }
+.analisis-chart-wrap-tinggi { height: 390px; }
+.analisis-catatan { margin: 10px 0 0; color: var(--teks-redup); font-size: .7rem; line-height: 1.45; }
+.analisis-ai { margin-top: 14px; padding: 11px 12px; border-radius: 10px; background: var(--aksen-muda); font-size: .78rem; line-height: 1.5; }
+.analisis-ai strong { display: block; margin-bottom: 4px; color: var(--aksen); font-size: .65rem; font-weight: 600; letter-spacing: .04em; }
+.analisis-ai p { margin: 0; color: var(--teks); }
+.sidebar-toggle {
+  display: block;
+  width: 36px;
+  height: 36px;
+  margin: 0 0 14px 8px;
+  padding: 0;
+  border: 1px solid var(--garis);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, .8);
+  color: var(--teks);
+  cursor: pointer;
+}
+.sidebar.is-collapsed { width: 76px; padding-right: 10px; padding-left: 10px; }
+.sidebar.is-collapsed .logo { margin-right: 0; margin-left: 4px; }
+.sidebar.is-collapsed .logo-text { display: none; }
+.sidebar.is-collapsed .sidebar-toggle { margin-left: 4px; }
+
+@media (max-width: 1100px) {
+  .analisis-grid { grid-template-columns: minmax(0, 1fr); }
+  .kartu-analisis:nth-child(3) { grid-column: auto; }
+  .analisis-chart-wrap-tinggi { height: 340px; }
+}
+
+@media (max-width: 600px) {
+  .analisis-filter { align-items: stretch; flex-direction: column; }
+  .analisis-filter > div { flex-basis: auto; }
+  .analisis-filter-submit { width: 100%; }
+  .kartu-analisis { padding: 15px; }
+  .analisis-chart-wrap { height: 220px; }
+  .analisis-chart-wrap-tinggi { height: 320px; }
+  .sidebar.is-collapsed { width: 100%; }
+  .sidebar.is-collapsed .logo-text { display: inline; }
+  .sidebar.is-collapsed .logo { margin-left: 10px; }
+}

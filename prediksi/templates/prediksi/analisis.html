@@ -1,0 +1,88 @@
+{% extends "prediksi/base.html" %}
+{% load static %}
+{% block judul %}Analisis Data Rumah Surabaya{% endblock %}
+
+{% block isi %}
+<header class="analisis-header">
+  <p class="analisis-eyebrow">PROPERTY &amp; MODEL ANALYTICS</p>
+  <h1 class="judul-halaman">Analisis data</h1>
+  <p class="sub">Pahami pola pasar dan cara model membaca karakteristik rumah.</p>
+</header>
+
+<section class="analisis-fakta" aria-label="Ringkasan sumber data">
+  <strong>Data dihitung langsung dari dataset asli.</strong>
+  <p>{{ fakta_data }}</p>
+</section>
+
+<form method="get" action="{% url 'analisis' %}" class="analisis-filter" data-url-penjelasan="{% url 'analisis_penjelasan' %}">
+  <div>
+    <label for="pilih-kecamatan">Kecamatan</label>
+    <select name="kecamatan" id="pilih-kecamatan">
+      <option value="">Semua kecamatan</option>
+      {% for nama in daftar_kecamatan %}
+        <option value="{{ nama }}" {% if nama == kecamatan %}selected{% endif %}>{{ nama|title }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label for="mode-harga">Tampilan harga per kecamatan</label>
+    <select name="mode" id="mode-harga">
+      <option value="total" {% if mode == "total" %}selected{% endif %}>Harga total</option>
+      <option value="m2" {% if mode == "m2" %}selected{% endif %}>Harga per m² tanah</option>
+    </select>
+  </div>
+  <button type="submit" class="analisis-filter-submit">Terapkan</button>
+</form>
+
+{% if peringatan_data_sedikit %}
+  <p class="analisis-peringatan" role="status">Data {{ kecamatan|title }} sedikit (n = {{ jumlah_kecamatan }}), baca dengan hati-hati.</p>
+{% endif %}
+
+{% if not data_tersedia %}
+  <p class="analisis-peringatan" role="status">Dataset belum tersedia. Periksa file data/rumah_surabaya.csv.</p>
+{% endif %}
+
+<div class="analisis-grid">
+  <section class="kartu-analisis" aria-labelledby="judul-grafik-01">
+    <h2 id="judul-grafik-01"><span>01</span> Distribusi harga rumah</h2>
+    <p class="analisis-subjudul">Jumlah rumah per rentang harga dalam Rp miliar.</p>
+    <div class="analisis-chart-wrap">
+      <canvas id="grafik-01" role="img" aria-label="Grafik batang distribusi jumlah rumah menurut rentang harga"></canvas>
+    </div>
+    <div class="analisis-ai" data-grafik="01" aria-live="polite">
+      <strong>Ditulis oleh AI · {{ model_ai }} · bisa keliru</strong>
+      <p class="analisis-ai-teks">Menyusun penjelasan…</p>
+    </div>
+  </section>
+
+  <section class="kartu-analisis" aria-labelledby="judul-grafik-02">
+    <h2 id="judul-grafik-02"><span>02</span> Harga per kecamatan</h2>
+    <p class="analisis-subjudul">Median harga; hanya kecamatan dengan minimal 20 rumah.</p>
+    <div class="analisis-chart-wrap analisis-chart-wrap-tinggi">
+      <canvas id="grafik-02" role="img" aria-label="Grafik batang mendatar median harga rumah per kecamatan"></canvas>
+    </div>
+    <div class="analisis-ai" data-grafik="02" aria-live="polite">
+      <strong>Ditulis oleh AI · {{ model_ai }} · bisa keliru</strong>
+      <p class="analisis-ai-teks">Menyusun penjelasan…</p>
+    </div>
+  </section>
+
+  <section class="kartu-analisis" aria-labelledby="judul-grafik-03">
+    <h2 id="judul-grafik-03"><span>03</span> Luas tanah vs harga</h2>
+    <p class="analisis-subjudul">Satu titik = satu rumah ({{ grafik_luas_harga.sample_count }} contoh acak).</p>
+    <div class="analisis-chart-wrap">
+      <canvas id="grafik-03" role="img" aria-label="Grafik sebaran luas tanah terhadap harga rumah"></canvas>
+    </div>
+    <p class="analisis-catatan">Sumbu dipotong; {{ grafik_luas_harga.outside }} rumah di luar batas tidak tampak.</p>
+    <div class="analisis-ai" data-grafik="03" aria-live="polite">
+      <strong>Ditulis oleh AI · {{ model_ai }} · bisa keliru</strong>
+      <p class="analisis-ai-teks">Menyusun penjelasan…</p>
+    </div>
+  </section>
+
+</div>
+
+{{ data_json|json_script:"data-analisis" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{% static 'prediksi/analisis.js' %}" defer></script>
+{% endblock %}

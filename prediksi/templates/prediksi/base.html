@@ -8,12 +8,14 @@
   <link rel="stylesheet" href="{% static 'prediksi/style.css' %}">
 </head>
 <body>
-  <aside class="sidebar">
-    <div class="logo">🏠 Rumah SBY</div>
-    <nav>
-      <a href="{% url 'dashboard' %}" class="{% if halaman == 'dashboard' %}aktif{% endif %}">🏠 Dashboard</a>
-      <a href="{% url 'prediksi' %}" class="{% if halaman == 'prediksi' %}aktif{% endif %}">🔮 Prediksi Harga</a>
-      <a href="{% url 'dataset' %}" class="{% if halaman == 'dataset' %}aktif{% endif %}">📊 Dataset</a>
+  <aside class="sidebar" id="menu-samping">
+    <div class="logo"><span class="logo-ikon" aria-hidden="true">🏠</span><span class="logo-text">Rumah SBY</span></div>
+    <button class="sidebar-toggle" type="button" aria-controls="navigasi-utama" aria-expanded="true" aria-label="Tutup menu">☰</button>
+    <nav id="navigasi-utama">
+      <a href="{% url 'dashboard' %}" class="{% if halaman == 'dashboard' %}aktif{% endif %}"{% if halaman == 'dashboard' %} aria-current="page"{% endif %}>🏠 Dashboard</a>
+      <a href="{% url 'prediksi' %}" class="{% if halaman == 'prediksi' %}aktif{% endif %}"{% if halaman == 'prediksi' %} aria-current="page"{% endif %}>🔮 Prediksi Harga</a>
+      <a href="{% url 'dataset' %}" class="{% if halaman == 'dataset' %}aktif{% endif %}"{% if halaman == 'dataset' %} aria-current="page"{% endif %}>📊 Dataset</a>
+      <a href="{% url 'analisis' %}" class="{% if halaman == 'analisis' %}aktif{% endif %}"{% if halaman == 'analisis' %} aria-current="page"{% endif %}>📈 Analisis Data</a>
     </nav>
   </aside>
 
@@ -22,5 +24,6 @@
   </main>
 
   {% block panel %}{% endblock %}
+  <script src="{% static 'prediksi/menu.js' %}" defer></script>
 </body>
 </html>
