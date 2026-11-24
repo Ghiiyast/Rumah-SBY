@@ -486,3 +486,188 @@ button:hover { opacity: .9; }
   .sidebar.is-collapsed .logo-text { display: inline; }
   .sidebar.is-collapsed .logo { margin-left: 10px; }
 }
+
+/* ===== Halaman Tentang ===== */
+.tentang-header { margin-bottom: 18px; }
+.tentang-eyebrow,
+.tentang-label {
+  margin: 0 0 8px;
+  color: var(--aksen);
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+}
+.tentang-header .judul-halaman { margin-bottom: 5px; }
+.tentang-header .sub { font-size: .88rem; }
+.tentang-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(250px, .8fr);
+  align-items: center;
+  gap: 24px;
+  padding: 26px;
+  border: 1px solid var(--garis);
+  border-radius: 16px;
+  background: var(--aksen-muda);
+}
+.tentang-hero-copy h2,
+.tentang-section-heading h2,
+.tentang-batasan h2,
+.tentang-profil h2 {
+  margin: 0;
+  color: var(--teks);
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  text-transform: none;
+}
+.tentang-tagline {
+  margin: 8px 0;
+  color: var(--aksen);
+  font-size: 1rem;
+  font-weight: 600;
+}
+.tentang-deskripsi,
+.tentang-teks {
+  margin: 0;
+  color: var(--teks-redup);
+  font-size: .84rem;
+  line-height: 1.65;
+}
+.tentang-statistik {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.tentang-stat {
+  min-width: 0;
+  padding: 12px 10px;
+  border: 1px solid var(--garis);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .78);
+}
+.tentang-stat span,
+.tentang-stat strong { display: block; }
+.tentang-stat span { color: var(--teks-redup); font-size: .68rem; line-height: 1.4; }
+.tentang-stat strong { margin-top: 5px; color: var(--aksen); font-size: 1.05rem; font-weight: 700; }
+.tentang-stat-status {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--teks-redup);
+  font-size: .72rem;
+}
+.tentang-section { margin-top: 26px; }
+.tentang-section-heading { margin-bottom: 12px; }
+.tentang-section-heading .tentang-label { margin-bottom: 5px; }
+.tentang-alur {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.tentang-langkah,
+.tentang-kartu,
+.tentang-profil {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--garis);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .85);
+}
+.tentang-nomor {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--aksen);
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -.03em;
+}
+.tentang-langkah h3,
+.tentang-model h3 {
+  margin: 0 0 7px;
+  color: var(--teks);
+  font-size: .9rem;
+  font-weight: 600;
+}
+.tentang-langkah p { margin: 0; color: var(--teks-redup); font-size: .76rem; line-height: 1.55; }
+.tentang-dua-kolom {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+}
+.tentang-kartu > .tentang-label { margin-bottom: 8px; }
+.tentang-model h3 { font-size: 1rem; }
+.tentang-model .tentang-teks { margin-bottom: 16px; }
+.tentang-model h4 { margin: 0 0 8px; color: var(--teks); font-size: .78rem; font-weight: 600; }
+.tentang-fitur {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tentang-fitur li {
+  padding: 8px;
+  border: 1px solid var(--garis);
+  border-radius: 9px;
+  color: var(--teks-redup);
+  font-size: .7rem;
+  line-height: 1.4;
+}
+.tentang-teknologi { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; }
+.tentang-teknologi li { display: flex; align-items: flex-start; gap: 11px; }
+.teknologi-ikon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--aksen-muda);
+  color: var(--aksen);
+}
+.teknologi-ikon svg { display: block; width: 18px; height: 18px; }
+.tentang-teknologi strong { display: block; color: var(--teks); font-size: .78rem; font-weight: 600; }
+.tentang-teknologi small { display: block; margin-top: 3px; color: var(--teks-redup); font-size: .72rem; line-height: 1.45; }
+.tentang-batasan {
+  margin-top: 16px;
+  padding: 20px;
+  border: 1px solid var(--garis);
+  border-radius: 14px;
+  background: var(--aksen-muda);
+}
+.tentang-batasan .tentang-label { margin-bottom: 5px; }
+.tentang-batasan h2 { font-size: 1rem; }
+.tentang-batasan ul { display: grid; gap: 7px; margin: 12px 0 0; padding-left: 18px; color: var(--teks-redup); font-size: .78rem; line-height: 1.55; }
+.tentang-profil { margin-top: 16px; }
+.tentang-profil .tentang-label { margin-bottom: 5px; }
+.tentang-profil h2 { font-size: 1rem; }
+.tentang-profil dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 18px;
+  margin: 18px 0 0;
+}
+.tentang-profil dl div { min-width: 0; }
+.tentang-profil dt { margin-bottom: 3px; color: var(--teks-redup); font-size: .7rem; }
+.tentang-profil dd { margin: 0; color: var(--teks); font-size: .8rem; font-weight: 500; overflow-wrap: anywhere; }
+.tentang-profil a { color: var(--aksen); text-decoration: none; }
+.tentang-profil a:hover { text-decoration: underline; }
+
+@media (max-width: 1050px) {
+  .tentang-alur { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 850px) {
+  .tentang-hero { grid-template-columns: 1fr; }
+  .tentang-dua-kolom { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .tentang-hero { gap: 18px; padding: 18px; }
+  .tentang-statistik { gap: 6px; }
+  .tentang-stat { padding: 10px 8px; }
+  .tentang-stat span { font-size: .62rem; }
+  .tentang-stat strong { font-size: .95rem; }
+  .tentang-alur { grid-template-columns: 1fr; }
+  .tentang-fitur { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tentang-profil dl { grid-template-columns: 1fr; }
+}

@@ -451,3 +451,72 @@ def unduh_dataset(request):
         filename="rumah_surabaya.csv",
         content_type="text/csv",
     )
+
+
+def tentang(request):
+    """Menampilkan pengenalan aplikasi dan informasi dari dataset asli."""
+    path_csv = BASE_DIR / "data" / "rumah_surabaya.csv"
+    jumlah_baris = None
+    jumlah_kolom = None
+    if DATASET_TERSEDIA and path_csv.exists():
+        try:
+            data_asli = pd.read_csv(path_csv, sep=";")
+        except pd.errors.EmptyDataError:
+            jumlah_baris = 0
+            jumlah_kolom = 0
+        else:
+            data_asli.columns = data_asli.columns.str.strip()
+            jumlah_baris = len(data_asli)
+            jumlah_kolom = len(data_asli.columns)
+
+    fitur_prediksi = [
+        "Kecamatan",
+        "Sertifikat",
+        "Kondisi Perabotan",
+        "Kondisi Properti",
+        "Jumlah Lantai",
+        "Kamar Tidur",
+        "Kamar Mandi",
+        "Luas Tanah",
+        "Luas Bangunan",
+    ]
+    teknologi = [
+        {
+            "nama": "Python & Django",
+            "deskripsi": "Bahasa pemrograman dan framework backend.",
+            "ikon": "kode",
+        },
+        {
+            "nama": "Scikit-learn",
+            "deskripsi": "Membangun dan menjalankan model Machine Learning.",
+            "ikon": "model",
+        },
+        {
+            "nama": "Groq AI",
+            "deskripsi": "Membantu menghasilkan penjelasan otomatis.",
+            "ikon": "ai",
+        },
+        {
+            "nama": "Chart.js",
+            "deskripsi": "Menampilkan visualisasi data.",
+            "ikon": "grafik",
+        },
+        {
+            "nama": "CSV & Pandas",
+            "deskripsi": "Pengolahan dan penyajian dataset.",
+            "ikon": "data",
+        },
+    ]
+    return render(request, "prediksi/tentang.html", {
+        "halaman": "tentang",
+        "dataset_tersedia": jumlah_baris is not None,
+        "jumlah_baris": (
+            f"{jumlah_baris:,}".replace(",", ".")
+            if jumlah_baris is not None
+            else None
+        ),
+        "jumlah_kolom": jumlah_kolom,
+        "fitur_prediksi": fitur_prediksi,
+        "jumlah_fitur": len(fitur_prediksi),
+        "teknologi": teknologi,
+    })

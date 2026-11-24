@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from django.test import TestCase
 from django.urls import reverse
+import pandas as pd
 import requests
 
 from . import views
@@ -281,3 +282,21 @@ class AnalisisDataTests(TestCase):
         grafik = buat_analisis(views.data.head(5))
 
         self.assertEqual(set(grafik), {"01", "02", "03"})
+
+
+class TentangPageTests(TestCase):
+    def test_halaman_tentang_menggunakan_statistik_dataset_asli(self):
+        response = self.client.get(reverse("tentang"))
+        dataset = pd.read_csv(views.BASE_DIR / "data" / "rumah_surabaya.csv", sep=";")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context["jumlah_baris"],
+            f"{len(dataset):,}".replace(",", "."),
+        )
+        self.assertEqual(response.context["jumlah_kolom"], len(dataset.columns))
+        self.assertEqual(response.context["jumlah_fitur"], 9)
+        self.assertContains(response, "Mengenal Rumah SBY")
+        self.assertContains(response, "Random Forest Regression")
+        self.assertContains(response, "mailto:tuanghiyast@gmail.com")
+        self.assertContains(response, 'aria-current="page">ⓘ Tentang')

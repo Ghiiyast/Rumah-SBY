@@ -8,4 +8,5 @@ urlpatterns = [
     path('analisis/penjelasan/', views.analisis_penjelasan, name='analisis_penjelasan'),
     path('dataset/', views.dataset_view, name='dataset'),
     path('dataset/unduh/', views.unduh_dataset, name='unduh_dataset'),
+    path('tentang/', views.tentang, name='tentang'),
 ]

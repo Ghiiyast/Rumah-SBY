@@ -1,0 +1,143 @@
+{% extends "prediksi/base.html" %}
+{% block judul %}Tentang Rumah SBY{% endblock %}
+
+{% block isi %}
+<header class="tentang-header">
+  <p class="tentang-eyebrow">RUMAH SBY · TENTANG</p>
+  <h1 class="judul-halaman">Tentang Rumah SBY</h1>
+  <p class="sub">Informasi tentang data, teknologi, dan batasan estimasi rumah.</p>
+</header>
+
+<section class="tentang-hero" aria-labelledby="judul-pengenalan">
+  <div class="tentang-hero-copy">
+    <p class="tentang-label">PENGENALAN APLIKASI</p>
+    <h2 id="judul-pengenalan">Mengenal Rumah SBY</h2>
+    <p class="tentang-tagline">Memahami nilai rumah, melalui data dan teknologi.</p>
+    <p class="tentang-deskripsi">
+      Rumah SBY merupakan aplikasi berbasis web yang membantu pengguna memperkirakan harga rumah di Surabaya menggunakan teknologi Machine Learning. Aplikasi ini memanfaatkan karakteristik properti untuk menghasilkan estimasi harga berdasarkan pola dari dataset yang digunakan.
+    </p>
+  </div>
+
+  <div class="tentang-statistik" aria-label="Statistik dataset dan fitur prediksi">
+    <div class="tentang-stat">
+      <span>Baris dataset</span>
+      <strong>{% if dataset_tersedia %}{{ jumlah_baris }}{% else %}—{% endif %}</strong>
+    </div>
+    <div class="tentang-stat">
+      <span>Kolom dataset</span>
+      <strong>{% if dataset_tersedia %}{{ jumlah_kolom }}{% else %}—{% endif %}</strong>
+    </div>
+    <div class="tentang-stat">
+      <span>Fitur prediksi</span>
+      <strong>{{ jumlah_fitur }}</strong>
+    </div>
+    {% if not dataset_tersedia %}
+      <p class="tentang-stat-status" role="status">Dataset belum tersedia.</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="tentang-section" aria-labelledby="judul-alur">
+  <div class="tentang-section-heading">
+    <p class="tentang-label">ALUR KERJA</p>
+    <h2 id="judul-alur">Bagaimana Rumah SBY Bekerja?</h2>
+  </div>
+  <div class="tentang-alur">
+    <article class="tentang-langkah">
+      <span class="tentang-nomor">01</span>
+      <h3>Data Properti</h3>
+      <p>Kumpulan data karakteristik dan harga rumah di Surabaya.</p>
+    </article>
+    <article class="tentang-langkah">
+      <span class="tentang-nomor">02</span>
+      <h3>Persiapan Data</h3>
+      <p>Pembersihan data dan penyesuaian kolom kategori agar dapat diproses oleh model.</p>
+    </article>
+    <article class="tentang-langkah">
+      <span class="tentang-nomor">03</span>
+      <h3>Pelatihan Model</h3>
+      <p>Model mempelajari pola hubungan karakteristik rumah dan harga menggunakan algoritma Random Forest.</p>
+    </article>
+    <article class="tentang-langkah">
+      <span class="tentang-nomor">04</span>
+      <h3>Prediksi dan Penjelasan</h3>
+      <p>Sistem menghasilkan estimasi harga berdasarkan input pengguna. Groq AI membantu menyusun penjelasan hasil prediksi.</p>
+    </article>
+  </div>
+</section>
+
+<section class="tentang-section" aria-labelledby="judul-teknologi">
+  <div class="tentang-section-heading">
+    <p class="tentang-label">MODEL DAN TEKNOLOGI</p>
+    <h2 id="judul-teknologi">Teknologi Utama</h2>
+  </div>
+  <div class="tentang-dua-kolom">
+    <article class="tentang-kartu tentang-model">
+      <p class="tentang-label">MODEL PREDIKSI</p>
+      <h3>Random Forest Regression</h3>
+      <p class="tentang-teks">
+        Algoritma Machine Learning yang menggabungkan beberapa pohon keputusan untuk mempelajari pola data dan menghasilkan estimasi harga rumah.
+      </p>
+      <h4>9 fitur input</h4>
+      <ul class="tentang-fitur">
+        {% for fitur in fitur_prediksi %}
+          <li>{{ fitur }}</li>
+        {% endfor %}
+      </ul>
+    </article>
+
+    <article class="tentang-kartu">
+      <p class="tentang-label">TEKNOLOGI UTAMA</p>
+      <ul class="tentang-teknologi">
+        {% for item in teknologi %}
+          <li>
+            <span class="teknologi-ikon" aria-hidden="true">
+              {% if item.ikon == "kode" %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m8 8-4 4 4 4"/><path d="m16 8 4 4-4 4"/><path d="m14 4-4 16"/></svg>
+              {% elif item.ikon == "model" %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h6v6H9z"/><path d="M9 1v3m6-3v3M9 20v3m6-3v3M1 9h3m-3 6h3m16-6h3m-3 6h3"/></svg>
+              {% elif item.ikon == "ai" %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="m19 16 .8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z"/></svg>
+              {% elif item.ikon == "grafik" %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10m5 10V4m5 16v-7m5 7V7"/><path d="M2 20h20"/></svg>
+              {% else %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8m-8 4h8"/></svg>
+              {% endif %}
+            </span>
+            <span>
+              <strong>{{ item.nama }}</strong>
+              <small>{{ item.deskripsi }}</small>
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
+    </article>
+  </div>
+</section>
+
+<section class="tentang-batasan" aria-labelledby="judul-batasan">
+  <p class="tentang-label">CATATAN PENGGUNAAN</p>
+  <h2 id="judul-batasan">Estimasi, Bukan Kepastian Harga.</h2>
+  <ul>
+    <li>Hasil prediksi berdasarkan pola dataset yang digunakan.</li>
+    <li>Harga prediksi bukan jaminan harga transaksi sebenarnya.</li>
+    <li>Model belum tentu memperhitungkan seluruh faktor eksternal seperti kondisi jalan, lingkungan, desain interior, dan perkembangan pasar.</li>
+    <li>Akurasi prediksi bergantung pada kualitas dan cakupan data.</li>
+    <li>Penjelasan AI dapat mengandung kekeliruan.</li>
+  </ul>
+</section>
+
+<section class="tentang-profil" aria-labelledby="judul-profil">
+  <div>
+    <p class="tentang-label">IDENTITAS PEMBUAT</p>
+    <h2 id="judul-profil">Proyek mata kuliah Sistem Cerdas</h2>
+  </div>
+  <dl>
+    <div><dt>Nama</dt><dd>Ghiyast Afif Ajuang Prakasa</dd></div>
+    <div><dt>NIM</dt><dd>253307053</dd></div>
+    <div><dt>Program Studi</dt><dd>D3 Teknologi Informasi</dd></div>
+    <div><dt>Kelas</dt><dd>3B</dd></div>
+    <div><dt>Institusi</dt><dd>Politeknik Negeri Madiun</dd></div>
+  </dl>
+</section>
+{% endblock %}
