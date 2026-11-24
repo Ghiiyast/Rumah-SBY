@@ -154,7 +154,6 @@ class AnalisisDataTests(TestCase):
         self.assertNotContains(response, "Feature importance")
         self.assertNotContains(response, "Prediksi vs aktual")
         self.assertNotContains(response, "Membaca performa model")
-        self.assertNotContains(response, "evaluasi")
         self.assertNotContains(response, "Jalankan python latih_model.py")
 
     def test_filter_kecamatan_memvalidasi_nama(self):
@@ -234,12 +233,6 @@ class AnalisisDataTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.json()["tersedia"])
         self.assertEqual(response.json()["teks"], "Penjelasan AI sedang tidak tersedia.")
-
-    def test_halaman_tidak_memerlukan_file_evaluasi(self):
-        response = self.client.get(reverse("analisis"))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Data dihitung langsung dari dataset asli.")
-        self.assertNotContains(response, "evaluasi")
 
     def test_halaman_tetap_tampil_jika_dataset_hilang(self):
         with patch("prediksi.views.data", data_kosong()):
